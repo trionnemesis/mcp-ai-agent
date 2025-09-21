@@ -1,6 +1,6 @@
 """
-MCP AI Agent Base Class with Gemini API Integration
-Provides unified interface for Gemini API and MCP server communication
+MCP AI Agent 基礎類別與 Gemini API 整合
+提供 Gemini API 與 MCP 伺服器通信的統一介面
 """
 
 import asyncio
@@ -18,41 +18,53 @@ from ..utils.config import Config
 
 
 class MCPTool(BaseModel):
-    """MCP Tool definition"""
-    name: str
-    description: str
-    parameters: Dict[str, Any]
+    """MCP 工具定義模型"""
+    name: str  # 工具名稱
+    description: str  # 工具描述
+    parameters: Dict[str, Any]  # 工具參數
 
 
 class AIResponse(BaseModel):
-    """AI Response model"""
-    content: str
-    tool_calls: List[Dict[str, Any]] = Field(default_factory=list)
-    confidence: float = Field(default=0.0)
-    risk_level: str = Field(default="low")
+    """AI 回應模型"""
+    content: str  # 回應內容
+    tool_calls: List[Dict[str, Any]] = Field(default_factory=list)  # 工具呼叫清單
+    confidence: float = Field(default=0.0)  # 信心度 (0-1)
+    risk_level: str = Field(default="low")  # 風險等級 (low/medium/high)
 
 
 class BaseMCPAgent(ABC):
     """
-    Base class for MCP AI Agents with Gemini API integration
-    Provides core functionality for AI-powered system operations
+    MCP AI 代理基礎類別，整合 Gemini API
+    提供 AI 驅動的系統操作核心功能
+
+    主要功能：
+    - Gemini API 整合與通信
+    - MCP 工具載入與管理
+    - 風險評估與安全控制
+    - 自然語言請求處理
     """
 
     def __init__(self, config: Config):
+        """
+        初始化 MCP AI 代理
+
+        Args:
+            config: 系統配置物件
+        """
         self.config = config
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.risk_assessor = RiskAssessor(config)
-        self.mcp_session: Optional[ClientSession] = None
-        self.available_tools: List[MCPTool] = []
+        self.risk_assessor = RiskAssessor(config)  # 風險評估器
+        self.mcp_session: Optional[ClientSession] = None  # MCP 連線會話
+        self.available_tools: List[MCPTool] = []  # 可用工具清單
 
-        # Initialize Gemini
+        # 初始化 Gemini API
         genai.configure(api_key=config.gemini_api_key)
         self.model = genai.GenerativeModel(config.gemini_model)
 
     async def initialize(self) -> None:
-        """Initialize MCP connection and load available tools"""
+        """初始化 MCP 連線並載入可用工具"""
         try:
-            # Connect to MCP server
+            # 連接到 MCP 伺服器
             server_params = StdioServerParameters(
                 command=["python", "-m", "mcp_ai_agent.mcp.server"],
                 env=None
@@ -61,22 +73,22 @@ class BaseMCPAgent(ABC):
             self.mcp_session = ClientSession(server_params)
             await self.mcp_session.__aenter__()
 
-            # Load available tools
+            # 載入可用工具
             await self._load_tools()
 
-            self.logger.info(f"Initialized {self.__class__.__name__} with {len(self.available_tools)} tools")
+            self.logger.info(f"已初始化 {self.__class__.__name__}，共載入 {len(self.available_tools)} 個工具")
 
         except Exception as e:
-            self.logger.error(f"Failed to initialize agent: {e}")
+            self.logger.error(f"代理初始化失敗: {e}")
             raise
 
     async def _load_tools(self) -> None:
-        """Load available MCP tools"""
+        """載入可用的 MCP 工具"""
         try:
             if not self.mcp_session:
-                raise RuntimeError("MCP session not initialized")
+                raise RuntimeError("MCP 會話尚未初始化")
 
-            # Get tools from MCP server
+            # 從 MCP 伺服器取得工具清單
             tools_response = await self.mcp_session.list_tools()
 
             for tool in tools_response.tools:
@@ -88,19 +100,19 @@ class BaseMCPAgent(ABC):
                 self.available_tools.append(mcp_tool)
 
         except Exception as e:
-            self.logger.error(f"Failed to load tools: {e}")
+            self.logger.error(f"工具載入失敗: {e}")
             raise
 
     async def process_request(self, user_input: str, context: Optional[Dict[str, Any]] = None) -> AIResponse:
         """
-        Process user request using AI and execute appropriate tools
+        使用 AI 處理使用者請求並執行適當的工具
 
         Args:
-            user_input: Natural language request from user
-            context: Additional context for processing
+            user_input: 使用者的自然語言請求
+            context: 處理過程中的額外上下文資訊
 
         Returns:
-            AIResponse with content and tool execution results
+            包含內容和工具執行結果的 AIResponse 物件
         """
         try:
             # Prepare system prompt with available tools

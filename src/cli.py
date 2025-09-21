@@ -1,6 +1,6 @@
 """
-CLI Interface for MCP AI Agent
-Non-interactive mode support with comprehensive command options
+MCP AI Agent 命令列介面
+提供非互動模式支援與完整的命令選項
 """
 
 import asyncio
@@ -23,7 +23,7 @@ from .utils.config import Config
 
 app = typer.Typer(
     name="mcp-agent",
-    help="MCP AI Agent - Intelligent System Administration with Gemini SDK",
+    help="MCP AI Agent - 使用 Gemini SDK 的智能系統管理工具",
     add_completion=False
 )
 
@@ -31,7 +31,7 @@ console = Console()
 
 
 def setup_logging(log_level: str, log_file: Optional[str] = None) -> None:
-    """Setup logging configuration"""
+    """設定日誌配置"""
     level = getattr(logging, log_level.upper(), logging.INFO)
 
     handlers = [logging.StreamHandler()]
