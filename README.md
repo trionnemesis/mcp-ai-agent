@@ -172,6 +172,21 @@ mcp-agent interactive
     時間: 5.1s | 工具: manage_service
 ```
 
+## Scripts
+
+### AIOps Log Analyzer Script (`aiops_log_analyzer.sh`)
+
+For environments where Python might not be available or for users who prefer shell scripts for easier maintenance, we provide a standalone bash script for AIOps log analysis.
+
+**Functionality:**
+
+1.  **Collects Apache Logs:** Gathers Apache error logs (404, 500, 503) from the last hour.
+2.  **Collects MySQL Status:** Fetches the current `SHOW FULL PROCESSLIST` from MySQL/MariaDB.
+3.  **AI-Powered Analysis:** Uses the Gemini CLI (non-interactive mode) to analyze the collected data.
+4.  **Generates Reports:** Saves the analysis report to `/var/log/report/`.
+
+This script is a great alternative for quick, ad-hoc analysis without needing the full Python agent setup.
+
 ## 🛠️ MCP 工具集詳解
 
 ### 📊 系統資訊收集工具
