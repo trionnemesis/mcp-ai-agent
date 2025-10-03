@@ -1,6 +1,6 @@
 """
-MCP Server with Linux System Operation Tools
-Provides standardized tools for system administration
+一個具備 Linux 系統操作工具的 MCP (機器控制通訊協定) 伺服器。
+此伺服器提供了一套標準化的工具，用於進行系統管理任務。
 """
 
 import asyncio
@@ -24,27 +24,27 @@ from mcp.types import (
 )
 
 
-# Configure logging
+# 設定日誌記錄
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("mcp-server")
 
-# Initialize server
+# 初始化伺服器
 server = Server("linux-system-tools")
 
 
 @server.list_tools()
 async def handle_list_tools() -> List[Tool]:
-    """List all available system tools"""
+    """列出所有可用的系統工具。"""
     return [
         Tool(
             name="get_system_info",
-            description="Get comprehensive system information including CPU, memory, disk usage",
+            description="獲取全面的系統資訊，包括 CPU、記憶體、磁碟使用情況等。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "detailed": {
                         "type": "boolean",
-                        "description": "Include detailed information",
+                        "description": "是否回傳詳細資訊。若為 true，將包含更深入的系統數據。",
                         "default": False
                     }
                 }
@@ -52,22 +52,22 @@ async def handle_list_tools() -> List[Tool]:
         ),
         Tool(
             name="monitor_processes",
-            description="Monitor running processes with filtering options",
+            description="監控正在運行的行程，並提供過濾與排序選項。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "filter_name": {
                         "type": "string",
-                        "description": "Filter processes by name"
+                        "description": "根據行程名稱進行過濾。只會顯示名稱包含此字串的行程。"
                     },
                     "sort_by": {
                         "type": "string",
-                        "description": "Sort by: cpu, memory, pid, name",
+                        "description": "排序依據：可選 'cpu' (CPU使用率), 'memory' (記憶體使用率), 'pid' (行程ID), 'name' (名稱)。",
                         "default": "cpu"
                     },
                     "limit": {
                         "type": "integer",
-                        "description": "Limit number of results",
+                        "description": "限制回傳結果的數量。",
                         "default": 10
                     }
                 }
@@ -75,17 +75,17 @@ async def handle_list_tools() -> List[Tool]:
         ),
         Tool(
             name="manage_service",
-            description="Manage systemd services (start, stop, restart, status)",
+            description="管理 systemd 服務，例如啟動、停止、重啟或查看狀態。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "service_name": {
                         "type": "string",
-                        "description": "Name of the service"
+                        "description": "要操作的服務名稱。"
                     },
                     "action": {
                         "type": "string",
-                        "description": "Action to perform",
+                        "description": "要執行的操作。",
                         "enum": ["start", "stop", "restart", "status", "enable", "disable"]
                     }
                 },
@@ -94,27 +94,27 @@ async def handle_list_tools() -> List[Tool]:
         ),
         Tool(
             name="check_logs",
-            description="Check system logs using journalctl",
+            description="使用 journalctl 檢查系統日誌。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "service": {
                         "type": "string",
-                        "description": "Specific service to check logs for"
+                        "description": "指定要檢查日誌的服務名稱。"
                     },
                     "lines": {
                         "type": "integer",
-                        "description": "Number of lines to retrieve",
+                        "description": "要檢索的日誌行數。",
                         "default": 50
                     },
                     "follow": {
                         "type": "boolean",
-                        "description": "Follow logs in real-time",
+                        "description": "是否即時追蹤新的日誌輸出。",
                         "default": False
                     },
                     "priority": {
                         "type": "string",
-                        "description": "Log priority level",
+                        "description": "日誌的優先級別。",
                         "enum": ["emerg", "alert", "crit", "err", "warning", "notice", "info", "debug"]
                     }
                 }
@@ -122,30 +122,30 @@ async def handle_list_tools() -> List[Tool]:
         ),
         Tool(
             name="file_operations",
-            description="Perform file and directory operations",
+            description="執行檔案與目錄的相關操作。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "operation": {
                         "type": "string",
-                        "description": "Operation to perform",
+                        "description": "要執行的操作。",
                         "enum": ["list", "create", "delete", "copy", "move", "permissions"]
                     },
                     "path": {
                         "type": "string",
-                        "description": "File or directory path"
+                        "description": "檔案或目錄的路徑。"
                     },
                     "target": {
                         "type": "string",
-                        "description": "Target path for copy/move operations"
+                        "description": "複製或移動操作的目標路徑。"
                     },
                     "permissions": {
                         "type": "string",
-                        "description": "Permissions in octal format (e.g., 755)"
+                        "description": "以八進位格式表示的權限（例如 '755'）。"
                     },
                     "recursive": {
                         "type": "boolean",
-                        "description": "Apply operation recursively",
+                        "description": "是否遞迴地執行操作。",
                         "default": False
                     }
                 },
@@ -154,22 +154,22 @@ async def handle_list_tools() -> List[Tool]:
         ),
         Tool(
             name="network_diagnostics",
-            description="Perform network diagnostics and monitoring",
+            description="執行網路診斷與監控。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "operation": {
                         "type": "string",
-                        "description": "Diagnostic operation",
+                        "description": "要執行的診斷操作。",
                         "enum": ["ping", "traceroute", "netstat", "ss", "iptables_list", "interfaces"]
                     },
                     "target": {
                         "type": "string",
-                        "description": "Target host for ping/traceroute"
+                        "description": "ping 或 traceroute 的目標主機。"
                     },
                     "count": {
                         "type": "integer",
-                        "description": "Number of packets for ping",
+                        "description": "ping 操作要發送的封包數量。",
                         "default": 4
                     }
                 },
@@ -178,22 +178,22 @@ async def handle_list_tools() -> List[Tool]:
         ),
         Tool(
             name="disk_management",
-            description="Disk space analysis and management",
+            description="進行磁碟空間分析與管理。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "operation": {
                         "type": "string",
-                        "description": "Disk operation",
+                        "description": "要執行的磁碟操作。",
                         "enum": ["usage", "free", "mount", "unmount", "fsck"]
                     },
                     "path": {
                         "type": "string",
-                        "description": "Path to analyze or mount point"
+                        "description": "要分析的路徑或掛載點。"
                     },
                     "device": {
                         "type": "string",
-                        "description": "Device to mount/unmount"
+                        "description": "要掛載或卸載的裝置。"
                     }
                 },
                 "required": ["operation"]
@@ -201,21 +201,21 @@ async def handle_list_tools() -> List[Tool]:
         ),
         Tool(
             name="execute_command",
-            description="Execute system commands with safety checks",
+            description="執行系統指令，並包含安全檢查。",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "command": {
                         "type": "string",
-                        "description": "Command to execute"
+                        "description": "要執行的指令字串。"
                     },
                     "working_dir": {
                         "type": "string",
-                        "description": "Working directory for command execution"
+                        "description": "執行指令時的工作目錄。"
                     },
                     "timeout": {
                         "type": "integer",
-                        "description": "Command timeout in seconds",
+                        "description": "指令執行的超時時間（秒）。",
                         "default": 30
                     }
                 },
@@ -227,7 +227,7 @@ async def handle_list_tools() -> List[Tool]:
 
 @server.call_tool()
 async def handle_call_tool(name: str, arguments: Optional[Dict[str, Any]]) -> List[TextContent]:
-    """Handle tool execution"""
+    """處理工具執行請求。"""
     try:
         if name == "get_system_info":
             return await get_system_info(arguments or {})
@@ -246,19 +246,19 @@ async def handle_call_tool(name: str, arguments: Optional[Dict[str, Any]]) -> Li
         elif name == "execute_command":
             return await execute_command(arguments or {})
         else:
-            raise ValueError(f"Unknown tool: {name}")
+            raise ValueError(f"未知的工具: {name}")
 
     except Exception as e:
-        logger.error(f"Error executing tool {name}: {e}")
-        return [TextContent(type="text", text=f"Error: {str(e)}")]
+        logger.error(f"執行工具 {name} 時發生錯誤: {e}")
+        return [TextContent(type="text", text=f"錯誤: {str(e)}")]
 
 
 async def get_system_info(args: Dict[str, Any]) -> List[TextContent]:
-    """Get comprehensive system information"""
+    """獲取全面的系統資訊。"""
     detailed = args.get("detailed", False)
 
     try:
-        # Basic system info
+        # 獲取基本系統資訊
         cpu_percent = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
         disk = psutil.disk_usage('/')
@@ -283,7 +283,7 @@ async def get_system_info(args: Dict[str, Any]) -> List[TextContent]:
         }
 
         if detailed:
-            # Add detailed information
+            # 新增詳細資訊
             info.update({
                 "cpu_count": psutil.cpu_count(),
                 "cpu_count_logical": psutil.cpu_count(logical=True),
@@ -296,11 +296,11 @@ async def get_system_info(args: Dict[str, Any]) -> List[TextContent]:
         return [TextContent(type="text", text=json.dumps(info, indent=2, default=str))]
 
     except Exception as e:
-        return [TextContent(type="text", text=f"Error getting system info: {str(e)}")]
+        return [TextContent(type="text", text=f"獲取系統資訊時發生錯誤: {str(e)}")]
 
 
 async def monitor_processes(args: Dict[str, Any]) -> List[TextContent]:
-    """Monitor running processes"""
+    """監控正在運行的行程。"""
     try:
         filter_name = args.get("filter_name")
         sort_by = args.get("sort_by", "cpu")
@@ -316,7 +316,7 @@ async def monitor_processes(args: Dict[str, Any]) -> List[TextContent]:
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 continue
 
-        # Sort processes
+        # 排序行程
         sort_key_map = {
             "cpu": "cpu_percent",
             "memory": "memory_percent",
@@ -327,24 +327,24 @@ async def monitor_processes(args: Dict[str, Any]) -> List[TextContent]:
         if sort_by in sort_key_map:
             processes.sort(key=lambda x: x[sort_key_map[sort_by]], reverse=True)
 
-        # Limit results
+        # 限制結果數量
         processes = processes[:limit]
 
         return [TextContent(type="text", text=json.dumps(processes, indent=2))]
 
     except Exception as e:
-        return [TextContent(type="text", text=f"Error monitoring processes: {str(e)}")]
+        return [TextContent(type="text", text=f"監控行程時發生錯誤: {str(e)}")]
 
 
 async def manage_service(args: Dict[str, Any]) -> List[TextContent]:
-    """Manage systemd services"""
+    """管理 systemd 服務。"""
     try:
         service_name = args["service_name"]
         action = args["action"]
 
-        # Validate service name
+        # 驗證服務名稱的合法性
         if not service_name.replace("-", "").replace("_", "").replace(".", "").isalnum():
-            return [TextContent(type="text", text="Invalid service name")]
+            return [TextContent(type="text", text="無效的服務名稱")]
 
         cmd = ["systemctl", action, service_name]
 
@@ -356,16 +356,16 @@ async def manage_service(args: Dict[str, Any]) -> List[TextContent]:
         )
 
         output = result.stdout + result.stderr
-        return [TextContent(type="text", text=f"Service {action} result:\n{output}")]
+        return [TextContent(type="text", text=f"服務 {action} 操作結果:\n{output}")]
 
     except subprocess.TimeoutExpired:
-        return [TextContent(type="text", text="Service operation timed out")]
+        return [TextContent(type="text", text="服務操作超時")]
     except Exception as e:
-        return [TextContent(type="text", text=f"Error managing service: {str(e)}")]
+        return [TextContent(type="text", text=f"管理服務時發生錯誤: {str(e)}")]
 
 
 async def check_logs(args: Dict[str, Any]) -> List[TextContent]:
-    """Check system logs using journalctl"""
+    """使用 journalctl 檢查系統日誌。"""
     try:
         service = args.get("service")
         lines = args.get("lines", 50)
@@ -389,13 +389,13 @@ async def check_logs(args: Dict[str, Any]) -> List[TextContent]:
         return [TextContent(type="text", text=result.stdout)]
 
     except subprocess.TimeoutExpired:
-        return [TextContent(type="text", text="Log retrieval timed out")]
+        return [TextContent(type="text", text="獲取日誌操作超時")]
     except Exception as e:
-        return [TextContent(type="text", text=f"Error checking logs: {str(e)}")]
+        return [TextContent(type="text", text=f"檢查日誌時發生錯誤: {str(e)}")]
 
 
 async def file_operations(args: Dict[str, Any]) -> List[TextContent]:
-    """Perform file and directory operations"""
+    """執行檔案與目錄的操作。"""
     try:
         operation = args["operation"]
         path = args["path"]
@@ -405,30 +405,30 @@ async def file_operations(args: Dict[str, Any]) -> List[TextContent]:
                 items = os.listdir(path)
                 return [TextContent(type="text", text=json.dumps(items, indent=2))]
             else:
-                return [TextContent(type="text", text=f"Path does not exist: {path}")]
+                return [TextContent(type="text", text=f"路徑不存在: {path}")]
 
         elif operation == "create":
             if os.path.exists(path):
-                return [TextContent(type="text", text=f"Path already exists: {path}")]
+                return [TextContent(type="text", text=f"路徑已存在: {path}")]
 
             if path.endswith('/'):
                 os.makedirs(path, exist_ok=True)
-                return [TextContent(type="text", text=f"Directory created: {path}")]
+                return [TextContent(type="text", text=f"目錄已建立: {path}")]
             else:
                 os.makedirs(os.path.dirname(path), exist_ok=True)
                 with open(path, 'w') as f:
                     f.write("")
-                return [TextContent(type="text", text=f"File created: {path}")]
+                return [TextContent(type="text", text=f"檔案已建立: {path}")]
 
         else:
-            return [TextContent(type="text", text=f"Operation {operation} not yet implemented")]
+            return [TextContent(type="text", text=f"操作 {operation} 尚未實現")]
 
     except Exception as e:
-        return [TextContent(type="text", text=f"Error in file operation: {str(e)}")]
+        return [TextContent(type="text", text=f"檔案操作時發生錯誤: {str(e)}")]
 
 
 async def network_diagnostics(args: Dict[str, Any]) -> List[TextContent]:
-    """Perform network diagnostics"""
+    """執行網路診斷。"""
     try:
         operation = args["operation"]
 
@@ -450,16 +450,16 @@ async def network_diagnostics(args: Dict[str, Any]) -> List[TextContent]:
             return [TextContent(type="text", text=result.stdout)]
 
         else:
-            return [TextContent(type="text", text=f"Network operation {operation} not yet implemented")]
+            return [TextContent(type="text", text=f"網路操作 {operation} 尚未實現")]
 
     except subprocess.TimeoutExpired:
-        return [TextContent(type="text", text="Network operation timed out")]
+        return [TextContent(type="text", text="網路操作超時")]
     except Exception as e:
-        return [TextContent(type="text", text=f"Error in network diagnostics: {str(e)}")]
+        return [TextContent(type="text", text=f"網路診斷時發生錯誤: {str(e)}")]
 
 
 async def disk_management(args: Dict[str, Any]) -> List[TextContent]:
-    """Disk space analysis and management"""
+    """進行磁碟空間分析與管理。"""
     try:
         operation = args["operation"]
 
@@ -477,7 +477,7 @@ async def disk_management(args: Dict[str, Any]) -> List[TextContent]:
                 }
                 return [TextContent(type="text", text=json.dumps(result, indent=2))]
             else:
-                return [TextContent(type="text", text=f"Path does not exist: {path}")]
+                return [TextContent(type="text", text=f"路徑不存在: {path}")]
 
         elif operation == "free":
             partitions = psutil.disk_partitions()
@@ -501,23 +501,23 @@ async def disk_management(args: Dict[str, Any]) -> List[TextContent]:
             return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
         else:
-            return [TextContent(type="text", text=f"Disk operation {operation} not yet implemented")]
+            return [TextContent(type="text", text=f"磁碟操作 {operation} 尚未實現")]
 
     except Exception as e:
-        return [TextContent(type="text", text=f"Error in disk management: {str(e)}")]
+        return [TextContent(type="text", text=f"磁碟管理時發生錯誤: {str(e)}")]
 
 
 async def execute_command(args: Dict[str, Any]) -> List[TextContent]:
-    """Execute system commands with safety checks"""
+    """執行系統指令，並包含安全檢查。"""
     try:
         command = args["command"]
         working_dir = args.get("working_dir", os.getcwd())
         timeout = args.get("timeout", 30)
 
-        # Basic safety checks
+        # 基本安全檢查，防止執行危險指令
         dangerous_commands = ["rm -rf /", "dd if=", "mkfs", "fdisk", ":(){ :|:& };:"]
         if any(dangerous in command for dangerous in dangerous_commands):
-            return [TextContent(type="text", text="Command blocked for safety reasons")]
+            return [TextContent(type="text", text="因安全考量，該指令已被封鎖")]
 
         result = subprocess.run(
             command,
@@ -528,7 +528,7 @@ async def execute_command(args: Dict[str, Any]) -> List[TextContent]:
             cwd=working_dir
         )
 
-        output = f"Exit code: {result.returncode}\n"
+        output = f"結束代碼: {result.returncode}\n"
         output += f"STDOUT:\n{result.stdout}\n"
         if result.stderr:
             output += f"STDERR:\n{result.stderr}"
@@ -536,14 +536,14 @@ async def execute_command(args: Dict[str, Any]) -> List[TextContent]:
         return [TextContent(type="text", text=output)]
 
     except subprocess.TimeoutExpired:
-        return [TextContent(type="text", text="Command execution timed out")]
+        return [TextContent(type="text", text="指令執行超時")]
     except Exception as e:
-        return [TextContent(type="text", text=f"Error executing command: {str(e)}")]
+        return [TextContent(type="text", text=f"執行指令時發生錯誤: {str(e)}")]
 
 
 async def main():
-    """Main server entry point"""
-    # Run the server using stdin/stdout streams
+    """伺服器主程式進入點。"""
+    # 透過 stdin/stdout 串流來執行伺服器
     async with stdio_server() as (read_stream, write_stream):
         await server.run(
             read_stream,
